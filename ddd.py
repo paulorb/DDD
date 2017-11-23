@@ -149,7 +149,7 @@ def CheckForFunction(lineCode):
 				return True;
 	return False
 
-for i in range(100):
+while(1==1):
 	
 	
 	for i in range(len(response)):
@@ -163,22 +163,45 @@ for i in range(100):
 	if(len(response)>3 and ("No such file or directory" in response[4]['payload']) ):
 		print "Stepping out"
 		response = gdbmi.write('fin')
-	#print response
+
+	#print "source"
+	#responseFrmes = gdbmi.write('info source')
+	#print responseFrmes[3]['payload']
+	
 	if 'frame' in response[4]['payload']:
 		if 'line' in response[4]['payload']['frame']:
 			#print(response[4]['payload']['frame']['line'])
 			if 'fullname' in response[4]['payload']['frame']:
 				#print(response[4]['payload']['frame']['fullname'])
 				#print "##################################################"
+				#print("Linha numero:",str(response[4]['payload']['frame']['line']))
 				lineCode = linecache.getline(response[4]['payload']['frame']['fullname'], int(response[4]['payload']['frame']['line']))
 				#print lineCode
 				originalCodeLine = lineCode
 				lineNumber = response[4]['payload']['frame']['line']
 				if(CheckForFunction(lineCode) == True):
 					isFunction = 1
-		#if 'func' in response[4]['payload']['frame']:
-			#print(response[4]['payload']['frame']['func'])
-
+		else:
+			print "no line member found"
+	else:
+		#print "no frame found"
+		lineAndCode = response[4]['payload']
+		#print lineAndCode
+		lineAndCodeansii = unicodedata.normalize('NFKD', lineAndCode).encode('ascii','ignore')
+		lineAndCodeSplit = lineAndCodeansii.split("\\t\\t")
+		#print lineAndCodeSplit
+		if(len(lineAndCodeSplit) < 2):
+			response = gdbmi.write('next')	
+			continue
+		
+		lineNumber = lineAndCodeSplit[0]
+		originalCodeLine = lineAndCodeSplit[1].replace("\\n","")
+		#print originalCodeLine
+		#print lineNumber
+		if(CheckForFunction(lineCode) == True):
+			isFunction = 1
+		
+		
 	if isFunction == 1:
 		print "Step into..."
 		response = gdbmi.write('step')
@@ -212,7 +235,7 @@ for i in range(100):
 					validVariable = False
 			if(validVariable is True):
 				originalCodeLine = originalCodeLine.replace(key,'\33[31m' + value+ '\33[37m',1)
-	print "Line:" +  lineNumber + " " + originalCodeLine.replace("\n","")
+	print "Line:" +  lineNumber + " " + originalCodeLine.replace("\n","").lstrip()
 	
 		
 	
