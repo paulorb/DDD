@@ -8,7 +8,7 @@ On this example on the left you can see the code and on the right the output of 
 ![alt text](https://raw.githubusercontent.com/paulorb/DDD/master/ddd_example.jpg)
 
 ## How to use?
+```Shell
 pip install pygdbmi
-
 ./ddd.py executable.out
-
+```
