@@ -153,19 +153,29 @@ def CheckForFunction(lineCode):
 
 while(1==1):
 	
+
 	
+	if(len(response)>3 and ("No such file or directory" in response[4]['payload']) ):
+		print "Stepping out"
+		response = gdbmi.write('fin')
+		#print response
+
+	#Verify if program finished
 	for i in range(len(response)):
 		if ('payload' in response[i]) and (response[i]['payload'] is not None):
 			if ("The program is not being run" in response[i]['payload'] ):
 				print "program finished..."
 				response = gdbmi.exit()
 				sys.exit()
-	
-	
-	if(len(response)>3 and ("No such file or directory" in response[4]['payload']) ):
-		print "Stepping out"
-		response = gdbmi.write('fin')
-
+			if ("exited with code" in response[i]['payload'] ):
+				print "program finished..."
+				response = gdbmi.exit()
+				sys.exit()
+			if ("exited normally" in response[i]['payload'] ):
+				print "program finished normally..."
+				response = gdbmi.exit()
+				sys.exit()	
+				
 	#print "source"
 	#responseFrmes = gdbmi.write('info source')
 	#print responseFrmes[3]['payload']
