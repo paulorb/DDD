@@ -218,7 +218,7 @@ while(1==1):
 	#print originalCodeLine
 	for key, value in g_dictVartoVal.items():
 		#print("Trying to replace " + key + " to " + value + " in " + originalCodeLine)
-		pos = originalCodeLine.find(key)
+		pos = originalCodeLine.find(key.lstrip().rstrip())
 		validVariable = True
 		#print("Pos= ",pos)
 		if(pos is not -1):
@@ -230,13 +230,13 @@ while(1==1):
 				else:
 					#print("validVariable FALSE")
 					validVariable = False
-			if(validVariable is True and  pos+len(key)+1 < len(originalCodeLine)):
-				if( not originalCodeLine[pos+len(key)].isalpha() and not originalCodeLine[pos+len(key)].isdigit()):
+			if(validVariable is True and  pos+len(key.lstrip().rstrip())+1 < len(originalCodeLine)):
+				if( not originalCodeLine[pos+len(key.lstrip().rstrip())].isalpha() and not originalCodeLine[pos+len(key.lstrip().rstrip())].isdigit()):
 					validVariable = True
 				else:
 					validVariable = False
 			if(validVariable is True):
-				originalCodeLine = originalCodeLine.replace(key,'\33[31m' + value+ '\33[37m',1)
+				originalCodeLine = originalCodeLine.replace(key.lstrip().rstrip(),'\33[31m' + value+ '\33[37m',1)
 	print "Line:" +  lineNumber + " " + originalCodeLine.replace("\n","").lstrip()
 	
 		
