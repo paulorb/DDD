@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #PauloRB 2017
 #v1 - POC
+#1.1 PRB 11/29/2017 Improved performance
 
 from pygdbmi.gdbcontroller import GdbController
 from pprint import pprint
@@ -11,7 +12,7 @@ import re
 import sys
 import unicodedata
 import sys
-
+import time
 
 cppKeywords =  ["asm","auto","bool","break","case","catch",
                    "char","class","const","const_cast",
@@ -85,7 +86,8 @@ g_executable = ""
 
 #Menu
 print("DDD - Data Driven Debug - PauloRB 2017");
-print("Usage ddd.py [executable name]");
+print("Usage ddd.py [executable name] ");
+print("Breakpoint will be set to main (default break in this version) ");
 print 'Number of arguments:', len(sys.argv), 'arguments.'
 print 'Argument List:', str(sys.argv)
 if(len(sys.argv) is 2):
@@ -113,7 +115,7 @@ g_dictVartoVal = {}
 
 def GetLocals():
 	g_dictVartoVal.clear()
-	response = gdbmi.write('info locals')
+	response = gdbmi.write('info locals',timeout_sec=0.05)
 	for local in response:
 		if ("console" in local['type'] and not u"\\n" in local['payload'] ):
 			varToval = local['payload'].split("=")
@@ -138,7 +140,7 @@ def CheckForFunction(lineCode):
 			continue
 		if worditem == '\n':
 			continue
-		ptyperesponse =  gdbmi.write("ptype " + worditem)
+		ptyperesponse =  gdbmi.write("ptype " + worditem,timeout_sec=0.05)
 		#print ptyperesponse
 		if ptyperesponse[1]['type'] == "console":
 			#print "Type" + " "+ptyperesponse[1]['payload']
@@ -209,7 +211,7 @@ while(1==1):
 		isFunction = 0
 	else:
 		#print "Next..."
-		response = gdbmi.write('next')	
+		response = gdbmi.write('next',timeout_sec=0.05)	
 	
 	GetLocals()
 	#print(g_dictVartoVal)
