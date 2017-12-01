@@ -10,5 +10,5 @@ On this example on the left you can see the code and on the right the output of 
 ## How to use?
 ```Shell
 pip install pygdbmi
-./ddd.py executable.out
+./ddd.py executable.out  --break functionname  --args arguments
 ```
