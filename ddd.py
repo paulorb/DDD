@@ -83,30 +83,55 @@ cppOperators = ["::",
 
 #Global Vars
 g_executable = ""
+g_args = ""
+g_break = ""
+
+# Start gdb process
+gdbmi = GdbController()
 
 #Menu
 print("DDD - Data Driven Debug - PauloRB 2017");
-print("Usage ddd.py [executable name] ");
+print("Usage ddd.py [executable name] --break functionname  --args arguments ");
 print("Breakpoint will be set to main (default break in this version) ");
 print 'Number of arguments:', len(sys.argv), 'arguments.'
 print 'Argument List:', str(sys.argv)
 if(len(sys.argv) is 2):
 	g_executable = str(sys.argv[1])
-else:
+if(len(sys.argv) > 2):
+	useargs = 0
+	g_executable = str(sys.argv[1])
+	for i in range(2,len(sys.argv)):
+		if(useargs==1):
+			g_args = g_args+ ' ' +sys.argv[i]
+		if(sys.argv[i] == "--args"):
+			useargs=1
+		if(sys.argv[i] == "--break"):
+			print "Breakpoint set: " + sys.argv[i+1]
+			g_break = sys.argv[i+1]
+			response = gdbmi.write("set breakpoint pending on")
+			pprint(response)
+			response = gdbmi.write('-break-insert -f ' + g_break )
+			pprint(response)
+	if(useargs==1):
+		print "args: " + g_args;
+		response = gdbmi.write('-exec-arguments ' + g_args)
+		pprint(response)
+			
+if(len(sys.argv) < 2):
 	print 'Expected [executable name]'
 	sys.exit()
 
-# Start gdb process
-gdbmi = GdbController()
+
 
 # Load binary a.out and get structured response
 response = gdbmi.write('-file-exec-and-symbols ' + g_executable)
 pprint(response)
-response = gdbmi.write('-break-insert main')
-pprint(response)
+if(g_break == ""):
+	response = gdbmi.write('-break-insert main')
+	pprint(response)
 response = gdbmi.write('run')
 pprint(response)
-response = gdbmi.write('next')
+response = gdbmi.write('next',timeout_sec=5)
 originalCodeLine = ""
 isFunction = 0;
 
@@ -180,6 +205,10 @@ while(1==1):
 	#responseFrmes = gdbmi.write('info source')
 	#print responseFrmes[3]['payload']
 	
+	if(len(response)<4):
+		response = gdbmi.write('next',timeout_sec=0.05)	
+		continue
+	
 	if 'frame' in response[4]['payload']:
 		if 'line' in response[4]['payload']['frame']:
 			#print(response[4]['payload']['frame']['line'])
@@ -198,7 +227,7 @@ while(1==1):
 	else:
 		#print "no frame found"
 		lineAndCode = response[4]['payload']
-		#print lineAndCode
+		print response
 		lineAndCodeansii = unicodedata.normalize('NFKD', lineAndCode).encode('ascii','ignore')
 		lineAndCodeSplit = lineAndCodeansii.split("\\t\\t")
 		#print lineAndCodeSplit
